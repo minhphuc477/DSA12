@@ -995,7 +995,87 @@ public:
             heapify(arr, size, largest);
         }
     }
+    //None-Comparision Sort:
+    
+    //Counting Sort
+    static int getMax(int arr[], int n) {
+        if (n == 0)
+            return INT_MIN;
 
+        int max = arr[0];
+        for (int i = 1; i < n; i++) {
+            if (arr[i] > max)
+                max = arr[i];
+        }
+        return max;
+    }
+
+    static void countSort(int arr[], int size) {
+        int max = getMax(arr, size);
+        int* count = new int[max + 1];
+
+        for (int i = 0; i <= max; ++i) {
+            count[i] = 0;
+        }
+
+        for (int i = 0; i < size; ++i) {
+            count[arr[i]]++;
+        }
+
+        for (int i = 1; i <= max; i++) 
+            count[i] += count[i - 1];
+        int* output = new int[size];
+        
+
+        for (int i = size - 1; i >= 0; i--) {
+            output[count[arr[i]] - 1] = arr[i];
+            count[arr[i]]--;
+        }
+        for (int i = size - 1; i >= 0; i--) {
+            arr[i] = output[i];
+        }
+        delete[] count;
+        delete[] output;
+    }
+
+    //Radix Sort 
+    static void radixSort(int* arr, int size, int digits = 0, int place = 1) {
+        int max = getMax(arr, size);
+
+        while (max > 0)
+        {
+            max /= 10;
+            digits++;
+        }
+        for (int i = 0; i < digits; i++) {
+            countSort(arr, size);
+            place *= 10;
+        }
+    }
+
+    //Bucket Sort
+    static void bucketSort(int arr[], int size) {
+        int max = getMax(arr, size);
+        int* bucket = new int[max + 1];
+
+        for (int i = 0; i <= max; i++) {
+            bucket[i] = 0;
+        }
+
+        for (int i = 0; i < size; i++) {
+            bucket[arr[i]]++;
+        }
+
+        for (int i = 0, j = 0; i <= max; i++) {
+            while (bucket[i] > 0) {
+                arr[j++] = i;
+                bucket[i]--;
+            }
+        }
+        delete[] bucket;
+     }
+
+    
     // Linear Search
     static int linearSearch(int arr[], int size, int key) {
         for (int i = 0; i < size; i++) {
@@ -1245,10 +1325,10 @@ public:
         if (root == nullptr) {
             root = createBSTNode(value);
         }
-        else if (value <= root->data) {
+        else if (value < root->data) {
             root->left = insert(root->left, value);
         }
-        else {
+        else if (value > root->data) {
             root->right = insert(root->right, value);
         }
         return root;
@@ -1297,11 +1377,11 @@ public:
         int minValue, maxValue;
         cin >> minValue >> maxValue;
 
-        std::mt19937 rng(static_cast<unsigned int>(time(0)));
+            mt19937 rng(static_cast<unsigned int>(time(0)));
 
         cout << "Adding " << numElements << " random elements to the tree...\n";
         for (int i = 0; i < numElements; i++) {
-            std::uniform_int_distribution<int> dist(minValue, maxValue);
+            uniform_int_distribution<int> dist(minValue, maxValue);
             int randomValue = dist(rng);
 
             root = insert(root, randomValue);
@@ -1317,7 +1397,7 @@ public:
             return;
         }
 
-        int spacing = 6; // Adjust this value to increase/decrease spacing between BSTNodes
+        int spacing = 10; // Adjust this value to increase/decrease spacing between BSTNodes
 
         space += spacing;
 
@@ -1763,7 +1843,90 @@ public:
         }
     }
 
+    void deleteH(BSTNode* current) {
+        if (current == nullptr) {
+            return;
+        }
+        deleteH(current->left);
+        deleteH(current->right);
 
+        delete current;
+    }
+
+    void deleteAll() {
+        deleteH(root);
+        root = nullptr;
+    }
+
+    void deleteN(BSTNode* current, BSTNode* parent) {
+        if (current == nullptr) {
+            return;
+        }
+
+        // Recursively delete the left and right subtrees
+        deleteN(current->left, current);
+        deleteN(current->right, current);
+
+        // Skip deleting the root node and its children
+        if (parent != nullptr) {
+            if (current == parent->left) {
+                parent->left = nullptr;
+            }
+            else {
+                parent->right = nullptr;
+            }
+            delete current;
+        }
+    }
+
+    void deleteA() {
+        deleteN(root, nullptr);
+    }
+
+    void deleteParentWithTwoChildren(BSTNode* node) {
+        if (node == nullptr || (node->left == nullptr && node->right == nullptr)) {
+            return;
+        }
+
+        if (node->left && node->left->left == nullptr && node->left->right == nullptr) {
+            BSTNode* temp = node->left;
+            node->left = nullptr;
+            delete temp;
+        }
+
+        if (node->right && node->right->left == nullptr && node->right->right == nullptr) {
+            BSTNode* temp = node->right;
+            node->right = nullptr;
+            delete temp;
+        }
+
+        deleteParentWithTwoChildren(node->left);
+        deleteParentWithTwoChildren(node->right);
+    }
+
+    void deleteRightView(BSTNode* node) {
+        if (node == nullptr || node->right == nullptr) {
+            return;
+        }
+        BSTNode* temp = node->right;
+        node->right = nullptr;
+        delete temp;
+
+        deleteRightView(node->left);
+        deleteRightView(node->right);
+    }
+
+    void deleteLeftView(BSTNode* node) {
+        if (node == nullptr || node->left == nullptr) {
+            return;
+        }
+        BSTNode* temp = node->left;
+        node->left = nullptr;
+        delete temp;
+
+        deleteLeftView(node->left);
+        deleteLeftView(node->right);
+    }
 };
 
 //Hash Table
@@ -1986,6 +2149,9 @@ public:
 //B-tree
 
 //Bonus part
+//Graphs
+//DFS
+//BFS
 
 
 int main() {
@@ -2626,8 +2792,14 @@ int main() {
                 cout << "5. Merge Sort" << endl;
                 cout << "6. Quick Sort" << endl;
                 cout << "7. Heap Sort" << endl;
+                cout << "-----------Search Operation------------" << endl;
                 cout << "8. Linear Search" << endl;
                 cout << "9. Binary Search" << endl;
+                cout << "---------None-Comparision Sort---------" << endl;
+                cout << "10. Counting Sort" << endl;
+                cout << "11. Radix Sort" << endl;
+                cout << "12. Bucket Sort" << endl;
+                cout << "--------------------------------------" << endl;
                 cout << "0. Exit" << endl;
                 cout << "--------------------------------------" << endl;
                 cout << "Enter your choice: ";
@@ -2675,6 +2847,15 @@ int main() {
                         cout << "Element not found" << endl;
                     break;
                 }
+                case 10: {
+                    SortSearch::countSort(arr, size);
+                }
+                case 11: {
+                    SortSearch::radixSort(arr, size);
+                }
+                case 12: {
+                    SortSearch::bucketSort(arr, size);
+                }
                 case 0:
                     exit = true;
                     break;
@@ -2706,7 +2887,7 @@ int main() {
                 cout << "3. Delete element" << endl;
                 cout << "4. Draw tree" << endl;
                 cout << "5. Maxium Depth of the Binary Tree" << endl;
-                cout << "6. Level Oder Traversal" << endl;
+                cout << "6. Level Order Traversal" << endl;
                 cout << "0. Exit" << endl;
                 cout << "-------------------------------" << endl;
                 cout << "Enter your choice: ";
@@ -2828,6 +3009,11 @@ int main() {
                 cout << "20. Preorder Traversal using Stack" << endl;
                 cout << "21. Postorder Traversal using Stack" << endl;
                 cout << "22. Level order Traversal using Stack" << endl;
+                cout << "23. Delete all of the Binary Search Tree\n";
+                cout << "24. Delete all the nodes except for the root\n";
+                cout << "25. Delete parent node that have two children nodes except the root\n";
+                cout << "26. Delete Rigth View of BST\n";
+                cout << "27. Delete Left View of BST\n";
                 cout << "0. Exit" << endl;
                 cout << "-------------------------------" << endl;
                 cout << "Enter your choice: ";
@@ -2924,6 +3110,32 @@ int main() {
                     break;
                 case 22:
                     bst.levelorderTraversal(bst.getRoot());
+                    break;
+                case 23:
+                {
+                    bst.deleteAll();
+                    if (bst.getRoot() == nullptr) {
+                        cout << "Binary search tree is now empty.\n";
+                    }
+                    else {
+                        cout << "Binary search tree is not empty.\n";
+                    }
+                    break;
+                }
+                case 24: {
+                    bst.deleteA();
+                    cout << "Root Node: " << bst.getRoot()->data << endl;
+                    break;
+                }
+                case 25: {
+                    bst.deleteParentWithTwoChildren(bst.getRoot());
+                    break;
+                }
+                case 26:
+                    bst.deleteRightView(bst.getRoot());
+                    break;
+                case 27:
+                    bst.deleteLeftView(bst.getRoot());
                     break;
                 case 0:
                     cout << "Exiting..." << endl;
