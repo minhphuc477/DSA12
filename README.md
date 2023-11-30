@@ -1,5 +1,5 @@
 # DSA12
-this repo is for algorithms and data structure study. IT MAY NOT PASS THE TEST CASE, PLEASE ONLY USE IT FOR PREFERENCE
+this repo is for algorithms and data structure study. IT MAY NOT PASS THE TEST CASE, PLEASE ONLY USE IT FOR REFERENCE <br>
 in this code include:
 <ol>
 <li> Array <br></li>
