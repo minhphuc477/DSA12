@@ -4,11 +4,14 @@
 #include <sstream>
 #include <algorithm>
 #include <queue>
-#include<stack>
+#include <stack>
+#include <vector>
+#include <random>
+#include <ctime>
 
 using namespace std;
 
-const int MAX_SIZE = 100;
+const int MAX_SIZE = 1000;
 // Array class
 class Array {
 private:
@@ -18,6 +21,9 @@ private:
 public:
     Array() : arr{}, size(0) {}
 
+    bool isFull() {
+        return (size == MAX_SIZE);
+    }
 
     void addElement(int element) {
         if (size < MAX_SIZE) {
@@ -84,6 +90,20 @@ public:
             cout << arr[i] << " ";
         }
         cout << endl;
+    }
+
+    void addRandomElement(int minRange, int maxRange) {
+        if (!isFull()) {
+            random_device rd;
+            mt19937 gen(rd());
+            uniform_int_distribution<> dis(minRange, maxRange);
+
+            int element = dis(gen);
+            arr[size++] = element;
+        }
+        else {
+            cout << "Array is full!" << endl;
+        }
     }
 };
 
@@ -249,6 +269,24 @@ public:
         }
         return count;
     }
+    void addRandomElements(int numElements, int minValue, int maxValue) {
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<int> dist(minValue, maxValue);
+
+        for (int i = 0; i < numElements; i++) {
+            int randomValue = dist(gen);
+            Node* newNode = new Node(randomValue);
+            if (head == nullptr) {
+                head = newNode;
+                tail = newNode;
+            }
+            else {
+                tail->next = newNode;
+                tail = newNode;
+            }
+        }
+    }
 };
 
 // Stack class
@@ -319,12 +357,29 @@ public:
         }
         return binary;
     }
+
+    void pushRandomElements(int count, int minRange, int maxRange) {
+        random_device rd;
+        mt19937 generator(rd());
+        uniform_int_distribution<int> distribution(minRange, maxRange);
+
+        for (int i = 0; i < count; i++) {
+            if (!isFull()) {
+                arr[++top] = distribution(generator);
+            }
+            else {
+                cout << "Stack is full!" << endl;
+                return;
+            }
+        }
+    }
+
 };
 
 // Queue class
 class Queue {
 private:
-    static const int MAX_SIZE = 100; 
+    static const int MAX_SIZE = 1000; 
     int arr[MAX_SIZE] = {};
     int front, rear;
 
@@ -394,6 +449,20 @@ public:
             enqueue(elements[i]);
         }
     }
+
+    void addRandomElements(int count, int minRange, int maxRange) {
+        if ((rear + 1) + count > MAX_SIZE) {
+            cout << "Not enough space in the queue to add all elements!" << endl;
+            return;
+        }
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(minRange, maxRange);
+
+        for (int i = 0; i < count; i++) {
+            enqueue(dis(gen));
+        }
+    }
 };
 
 //Double Linked List
@@ -425,7 +494,7 @@ public:
         }
 
         DNode* current = head;
-        cout << "Elements in the Double Linked List: ";
+        cout << "Elements in the Double Linked List: \n";
         while (current != nullptr) {
             cout << current->data << " ";
             current = current->next;
@@ -571,6 +640,17 @@ public:
         }
 
         cout << "No element found that is equal to or greater than " << x << " in the Double Linked List." << endl;
+    }
+
+    void addRandomElements(int count, int minRange, int maxRange) {
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(minRange, maxRange);
+
+        for (int i = 0; i < count; i++) {
+            int element = dis(gen);
+            addElement(element);
+        }
     }
 };
 
@@ -747,6 +827,21 @@ public:
             current = current->next;
         } while (current != head);
         cout << "Element " << findValue << " not found in the list." << endl;
+    }
+    
+    void addRandomElements(int numElements, int minValue, int maxValue) {
+        if (minValue >= maxValue) {
+            cout << "Invalid range. Please provide a valid range." << endl;
+            return;
+        }
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(minValue, maxValue);
+        cout << "Adding " << numElements << " random elements in the range [" << minValue << ", " << maxValue << "]:" << endl;
+        for (int i = 0; i < numElements; i++) {
+            int value = dis(gen);
+            addElement(value);
+        }
     }
 };
 
@@ -926,6 +1021,10 @@ public:
 
         return -1;
     }
+
+    static int generateRandomElement(int minRange, int maxRange) {
+        return minRange + rand() % (maxRange - minRange + 1);
+    }
 };
 
 //Binary Tree
@@ -945,10 +1044,15 @@ public:
 class BinaryTree {
 private:
     TreeNode* root;
+    std::default_random_engine rng;
 
 public:
     BinaryTree() {
         root = nullptr;
+    }
+
+    void setRng(std::default_random_engine& engine) {
+        rng = engine;
     }
 
     TreeNode* getRoot() {
@@ -1151,15 +1255,56 @@ public:
     }
 
     void addElements() {
+        int choice;
+        cout << "Choose an option to add elements:" << endl;
+        cout << "1. Manually" << endl;
+        cout << "2. Randomly" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            addElementsManually();
+            break;
+        case 2:
+            addElementsRandomly();
+            break;
+        default:
+            cout << "Invalid choice. Please try again." << endl;
+            break;
+        }
+    }
+
+    void addElementsManually() {
         int numElements;
         cout << "Enter the number of elements to add: ";
         cin >> numElements;
 
-        cout << "Enter the root element and other leaf elements after: ";
+        cout << "Enter the elements: ";
         for (int i = 0; i < numElements; i++) {
             int element;
             cin >> element;
             root = insert(root, element);
+        }
+    }
+
+    void addElementsRandomly() {
+        int numElements;
+        cout << "Enter the number of elements to add: ";
+        cin >> numElements;
+
+        cout << "Enter the range of random values (min max): ";
+        int minValue, maxValue;
+        cin >> minValue >> maxValue;
+
+        std::mt19937 rng(static_cast<unsigned int>(time(0)));
+
+        cout << "Adding " << numElements << " random elements to the tree...\n";
+        for (int i = 0; i < numElements; i++) {
+            std::uniform_int_distribution<int> dist(minValue, maxValue);
+            int randomValue = dist(rng);
+
+            root = insert(root, randomValue);
         }
     }
 
@@ -1240,7 +1385,7 @@ public:
         q.push(root);
 
         while (!q.empty()) {
-            int size = q.size();
+            size_t size = q.size();
             for (int i = 0; i < size; i++) {
                 BSTNode* current = q.front();
                 q.pop();
@@ -1274,7 +1419,7 @@ public:
         q.push(root);
 
         while (!q.empty()) {
-            int size = q.size();
+            size_t size = q.size();
             for (int i = 0; i < size; i++) {
                 BSTNode* current = q.front();
                 q.pop();
@@ -1623,13 +1768,235 @@ public:
 
 //Hash Table
 
+// Direct chaining
+struct DCNode {
+    int key;
+    DCNode* next;
+};
+
+// Coalesced chaining
+struct CCNode {
+    int data;
+    int ccnext;
+};
+
+class HashTable {
+private:
+    vector<CCNode> table1;
+    vector<DCNode*> table;
+    int size;
+    int M;
+
+public:
+    // Constructor
+    HashTable(int size, bool isDC, int M) {
+        this->size = size;
+        this->M = M;
+        if (isDC) {
+            table.resize(size, nullptr);
+        }
+        else {
+            table1.resize(size);
+            for (int i = 0; i < size; i++) {
+                table1[i].data = -1;
+                table1[i].ccnext = -1;
+            }
+            table.resize(size, nullptr); // Add this line
+        }
+    }
+
+    // Direct Chaining (DC)
+    int hashDC(int key) {
+        return key % M;
+    }
+
+    void insertDC(int key) {
+        int pos = hashDC(key);
+        DCNode* newNode = new DCNode;
+        newNode->key = key;
+        newNode->next = nullptr;
+
+        if (table[pos] == nullptr) {
+            table[pos] = newNode;
+        }
+        else {
+            DCNode* curr = table[pos];
+            while (curr->next != nullptr) {
+                curr = curr->next;
+            }
+            curr->next = newNode;
+        }
+    }
+
+    void removeDC(int key) {
+        int pos = hashDC(key);
+
+        if (table[pos] == nullptr) {
+            cout << "Element not found!" << endl;
+            return;
+        }
+
+        DCNode* curr = table[pos];
+        DCNode* prev = nullptr;
+
+        while (curr != nullptr && curr->key != key) {
+            prev = curr;
+            curr = curr->next;
+        }
+
+        if (curr == nullptr) {
+            cout << "Element not found!" << endl;
+            return;
+        }
+
+        if (prev == nullptr) {
+            table[pos] = curr->next;
+        }
+        else {
+            prev->next = curr->next;
+        }
+
+        delete curr;
+        cout << "Element removed successfully!" << endl;
+    }
+
+    bool searchDC(int key) {
+        int pos = hashDC(key);
+        DCNode* curr = table[pos];
+
+
+        while (curr != nullptr) {
+            if (curr->key == key) {
+                cout << "Element found! At position " << pos << endl;
+                return true;
+            }
+            curr = curr->next;
+        }
+
+        cout << "Element not found!" << endl;
+        return false;
+    }
+
+
+    void displayDC() {
+        cout << "Hash Table:" << endl;
+        for (int i = 0; i < size; i++) {
+            if (table[i] != nullptr) {
+                cout << i << ": ";
+                DCNode* curr = table[i];
+                while (curr != nullptr) {
+                    cout << curr->key << " -> ";
+                    curr = curr->next;
+                }
+                cout << "nullptr" << endl;
+            }
+        }
+    }
+
+    // Coalesced Chaining (CC)
+    int hashCC(int key) {
+        return key % M;
+    }
+
+    void insertCC(int key) {
+        int pos = hashCC(key);
+        int ccnextIndex = -1;
+
+        if (table1[pos].data == -1) {
+            table1[pos].data = key;
+            table1[pos].ccnext = -1;
+        }
+        else {
+            ccnextIndex = pos;
+            while (table1[ccnextIndex].ccnext != -1) {
+                ccnextIndex = table1[ccnextIndex].ccnext;
+            }
+            int availableSlot = -1;
+            for (int i = 0; i < size; i++) {
+                if (table1[i].data == -1 && table1[i].ccnext == -1) {
+                    availableSlot = i;
+                    break;
+                }
+            }
+            if (availableSlot != -1) {
+                table1[ccnextIndex].ccnext = availableSlot;
+                table1[availableSlot].data = key;
+                table1[availableSlot].ccnext = -1;
+            }
+            else {
+                cout << "Hash table is full!" << endl;
+            }
+        }
+    }
+
+    void removeCC(int key) {
+        int pos = hashCC(key);
+        int ccnextIndex = pos;
+        while (ccnextIndex != -1) {
+            if (table1[ccnextIndex].data == key) {
+                table1[ccnextIndex].data = -1;
+                table1[ccnextIndex].ccnext = -1;
+                cout << "Element removed successfully!" << endl;
+                return;
+            }
+            ccnextIndex = table1[ccnextIndex].ccnext;
+        }
+        cout << "Element not found!" << endl;
+    }
+
+    bool searchCC(int key) {
+        int pos = hashCC(key);
+        int ccnextIndex = pos;
+        while (ccnextIndex != -1) {
+            if (table1[ccnextIndex].data == key) {
+                cout << "Element found! At position " << pos << endl;
+                return true;
+            }
+            ccnextIndex = table1[ccnextIndex].ccnext;
+        }
+
+        cout << "Element not found!" << endl;
+        return false;
+    }
+
+    void displayCC() {
+        cout << "Hash value\tData\tNext" << endl;
+        cout << "-------------------------" << endl;
+
+        for (int i = 0; i < size; i++) {
+            if (table1[i].data != -1) {
+                cout << i << "\t\t";
+                cout << table1[i].data << "\t";
+                if (table1[i].ccnext != -1) {
+                    cout << table1[i].ccnext;
+                }
+                else {
+                    cout << "NULL";
+                }
+                cout << endl;
+            }
+        }
+    }
+
+   
+
+};
+
+
 //B-tree
 
 //Bonus part
 
 
 int main() {
+    int* data = new int[10000];
     int choice;
+    int count;
+    int minRange;
+    int maxRange;
+    int numElements;
+    int minValue;
+    int maxValue;
     Array arr;
     LinkedList linkedList;
     Stack stack;
@@ -1648,7 +2015,7 @@ int main() {
         cout << "7. Sort and Search" << endl;
         cout << "8. Binary Tree" << endl;
         cout << "9. Binary Search Tree" << endl;
-        cout << "10. HashTable" << endl;//not done yet
+        cout << "10. HashTable" << endl;
         cout << "11. B-tree" << endl;//not done yet
         cout << "12. Bonus part" << endl;
         cout << "0. Exit" << endl;
@@ -1668,6 +2035,7 @@ int main() {
                 cout << "3. Delete element" << endl;
                 cout << "4. Find element" << endl;
                 cout << "5. Display" << endl;
+                cout << "6. Random elements" << endl;
                 cout << "0. Back" << endl;
                 cout << "-------------------------" << endl;
                 cout << "Enter your choice: ";
@@ -1712,6 +2080,19 @@ int main() {
                 case 5:
                     arr.display();
                     break;
+                case 6:
+                {
+                    cout << "Enter the number of random elements to generate: ";
+                    cin >> count;
+                    cout << "Enter the minimum range: ";
+                    cin >> minRange;
+                    cout << "Enter the maximum range: ";
+                    cin >> maxRange;
+
+                    for (int i = 0; i < count; i++) {
+                        arr.addRandomElement(minRange, maxRange);
+                    }
+                }
                 case 0:
                     break;
                 default:
@@ -1733,6 +2114,7 @@ int main() {
                 cout << "4. Find element (Sequential Search)" << endl;
                 cout << "5. Find element (Binary Search)" << endl;
                 cout << "6. Display" << endl;
+                cout << "7. Random Elements" << endl;
                 cout << "0. Back" << endl;
                 cout << "----------------------------" << endl;
                 cout << "Enter your choice: ";
@@ -1800,6 +2182,18 @@ int main() {
                 case 6:
                     linkedList.display();
                     break;
+                case 7:
+                {
+                    cout << "Enter the number of random elements: ";
+                    cin >> numElements;
+                    cout << "Enter the minimum value: ";
+                    cin >> minValue;
+                    cout << "Enter the maximum value: ";
+                    cin >> maxValue;
+                    linkedList.addRandomElements(numElements, minValue, maxValue);
+                    cout << "Random elements added to the linked list." << endl;
+                    break;
+                }
                 case 0:
                     break;
                 default:
@@ -1822,6 +2216,7 @@ int main() {
                 cout << "4. Binary to Decimal conversion" << endl;
                 cout << "5. Decimal to Binary conversion" << endl;
                 cout << "6. Check if stack is empty or not" << endl;
+                cout << "7. Random elements" << endl;
                 cout << "0. Back" << endl;
                 cout << "-------------------------" << endl;
                 cout << "Enter your choice: ";
@@ -1880,6 +2275,17 @@ int main() {
                     }
                     break;
                 }
+                case 7:
+                {
+                    cout << "Enter the number of random elements to generate: ";
+                    cin >> count;
+                    cout << "Enter the minimum range: ";
+                    cin >> minRange;
+                    cout << "Enter the maximum range: ";
+                    cin >> maxRange;
+                    stack.pushRandomElements(count, minRange, maxRange);
+                    break;
+                }
                 case 0:
                     break;
                 default:
@@ -1889,7 +2295,7 @@ int main() {
             } while (stackChoice != 0);
 
             break;
-        case 4:{
+        case 4: {
             int queueChoice;
             do {
                 cout << "-------------------------" << endl;
@@ -1900,6 +2306,7 @@ int main() {
                 cout << "3. Enqueue element (adding an element to the end of a queue)" << endl;
                 cout << "4. Dequeue element (removing an element from the front of a queue)" << endl;
                 cout << "5. Display" << endl;
+                cout << "6. Random elements" << endl;
                 cout << "0. Back" << endl;
                 cout << "-------------------------" << endl;
                 cout << "Enter your choice: ";
@@ -1946,6 +2353,17 @@ int main() {
                 case 5:
                     queue.display();
                     break;
+                case 6:
+                {
+                    cout << "Enter the number of random elements to generate: ";
+                    cin >> count;
+                    cout << "Enter the minimum range: ";
+                    cin >> minRange;
+                    cout << "Enter the maximum range: ";
+                    cin >> maxRange;
+
+                    queue.addRandomElements(count, minRange, maxRange);
+                }
                 case 0:
                     break;
                 default:
@@ -1974,6 +2392,7 @@ int main() {
                 cout << "7. Delete the last element from the List" << endl;
                 cout << "8. Delete a specific element from the List" << endl;
                 cout << "9. Find an element and insert a new element in front of it" << endl;
+                cout << "10. Random elements" << endl;
                 cout << "0. Exit" << endl;
                 cout << "------------------------------" << endl;
                 cout << "Enter your choice: ";
@@ -2036,7 +2455,16 @@ int main() {
                     cin >> x;
                     dlList.findAndInsertElement(x);
                     break;
-
+                case 10: {
+                    cout << "Enter the number of elements to generate: ";
+                    cin >> count;
+                    cout << "Enter the minimum range: ";
+                    cin >> minRange;
+                    cout << "Enter the maximum range: ";
+                    cin >> maxRange;
+                    dlList.addRandomElements(count, minRange, maxRange);
+                    break;
+                }
                 case 0:
                     cout << "Exiting the program." << endl;
                     break;
@@ -2053,6 +2481,7 @@ int main() {
             CircularLinkedList list;
             int value, findValue, insertValue;
             int numElements;
+            int choice = 0;
 
             do {
                 cout << "-------------------------------" << endl;
@@ -2066,6 +2495,7 @@ int main() {
                 cout << "6. Display the list" << endl;
                 cout << "7. Insert multiple elements" << endl;
                 cout << "8. Find and add a element after it" << endl;
+                cout << "9. Random elements" << endl;
                 cout << "0. Exit" << endl;
                 cout << "-------------------------------" << endl;
                 cout << "Enter your choice: ";
@@ -2110,10 +2540,20 @@ int main() {
                     cout << "Enter the element to find: ";
                     cin >> findValue;
                     cout << "Enter the element to insert after " << findValue
-                         << ": ";
+                        << ": ";
                     cin >> insertValue;
                     list.findAndInsertElement(findValue, insertValue);
                     break;
+                case 9: {
+                    cout << "Enter the number of random elements to generate: ";
+                    cin >> numElements;
+                    cout << "Enter the minimum value: ";
+                    cin >> minValue;
+                    cout << "Enter the maximum value: ";
+                    cin >> maxValue;
+                    list.addRandomElements(numElements, minValue, maxValue);
+                    break;
+                }
                 case 0:
                     cout << "Exiting the program." << endl;
                     break;
@@ -2126,17 +2566,51 @@ int main() {
 
             break;
         }
-        case 7:
-        {
+
+        case 7: {
+            srand(static_cast<unsigned int>(time(nullptr)));
+
             int size;
             cout << "Enter the size of the array: ";
             cin >> size;
 
             int* arr = new int[size];
 
-            cout << "Enter " << size << " elements: ";
-            for (int i = 0; i < size; i++)
-                cin >> arr[i];
+            int initOption;
+            cout << "Choose an option to initialize the array:\n";
+            cout << "-------------------------------" << endl;
+            cout << "1. Enter elements " << endl;
+            cout << "2. Add random elements" << endl;
+            cout << "-------------------------------" << endl;
+            cin >> initOption;
+
+            if (initOption == 1) {
+                cout << "Enter " << size << " elements : ";
+                for (int i = 0; i < size; i++)
+                    cin >> arr[i];
+            }
+            else if (initOption == 2) {
+                int minRange, maxRange;
+                cout << "Enter the minimum range: ";
+                cin >> minRange;
+                cout << "Enter the maximum range: ";
+                cin >> maxRange;
+
+                for (int i = 0; i < size; i++) {
+                    arr[i] = SortSearch::generateRandomElement(minRange, maxRange);
+                }
+
+                cout << "Array after adding random elements: ";
+                for (int i = 0; i < size; i++) {
+                    cout << arr[i] << " ";
+                }
+                cout << endl;
+            }
+            else {
+                cout << "Invalid option" << endl;
+                delete[] arr;
+                return 0;
+            }
 
             int choice;
             int key;
@@ -2156,8 +2630,9 @@ int main() {
                 cout << "9. Binary Search" << endl;
                 cout << "0. Exit" << endl;
                 cout << "--------------------------------------" << endl;
-                cout << "Enter your choice: " << endl;
+                cout << "Enter your choice: ";
                 cin >> choice;
+
                 switch (choice) {
                 case 1:
                     SortSearch::selectionSort(arr, size);
@@ -2180,36 +2655,40 @@ int main() {
                 case 7:
                     SortSearch::heapSort(arr, size);
                     break;
-                case 8:
+                case 8: {
                     cout << "Enter the key to search: ";
                     cin >> key;
-                    if (SortSearch::linearSearch(arr, size, key) != -1)
-                        cout << "Element found at index " << SortSearch::linearSearch(arr, size, key) << endl;
+                    int linearSearchResult = SortSearch::linearSearch(arr, size, key);
+                    if (linearSearchResult != -1)
+                        cout << "Element found at index " << linearSearchResult << endl;
                     else
                         cout << "Element not found" << endl;
                     break;
-                case 9:
+                }
+                case 9: {
                     cout << "Enter the key to search: ";
                     cin >> key;
-                    if (SortSearch::binarySearch(arr, 0, size - 1, key) != -1)
-                        cout << "Element found at index " << SortSearch::binarySearch(arr, 0, size - 1, key) << endl;
+                    int binarySearchResult = SortSearch::binarySearch(arr, 0, size - 1, key);
+                    if (binarySearchResult != -1)
+                        cout << "Element found at index " << binarySearchResult << endl;
                     else
                         cout << "Element not found" << endl;
                     break;
+                }
                 case 0:
                     exit = true;
                     break;
                 default:
                     cout << "Invalid choice" << endl;
                 }
+
                 cout << "Array after operation: ";
                 for (int i = 0; i < size; i++)
                     cout << arr[i] << " ";
                 cout << endl;
-            } while (choice != 0);
+            } while (!exit);
 
             delete[] arr;
-
             break;
         }
 
@@ -2230,20 +2709,46 @@ int main() {
                 cout << "6. Level Oder Traversal" << endl;
                 cout << "0. Exit" << endl;
                 cout << "-------------------------------" << endl;
-                cout << "Enter your choice: " << endl;
+                cout << "Enter your choice: ";
                 cin >> choice;
                 switch (choice) {
 
                 case 1: {
-                    cout << "Enter values for the binary tree, the fist element will be the root (enter -1 to stop):\n";
-                    int value;
-                    while (true) {
-                        cout << "Enter value: ";
-                        cin >> value;
-                        if (value == -1) {
-                            break;
+                    cout << "-----------------------------" << endl;
+                    cout << "1. Enter values manually\n";
+                    cout << "2. Generate random values\n";
+                    cout << "Enter your choice: ";
+                    int choice;
+                    cin >> choice;
+
+                    if (choice == 1) {
+                        int value;
+                        while (true) {
+                            cout << "Enter value (-1 to stop): ";
+                            cin >> value;
+                            if (value == -1) {
+                                break;
+                            }
+                            tree.insertNode(value);
                         }
-                        tree.insertNode(value);
+                    }
+                    else if (choice == 2) {
+                        cout << "Enter the number of random values to generate: ";
+                        int numValues;
+                        cin >> numValues;
+
+                        uniform_int_distribution<int> dist(1, 100);
+                        std::random_device rd;
+                        std::default_random_engine rng(rd());
+                        tree.setRng(rng);
+
+                        for (int i = 0; i < numValues; i++) {
+                            int value = dist(rng);
+                            tree.insertNode(value);
+                        }
+                    }
+                    else {
+                        cout << "\nInvalid choice! Please try again.\n";
                     }
                     break;
                 }
@@ -2299,29 +2804,30 @@ int main() {
             do {
                 cout << endl;
                 cout << "-------------------------------" << endl;
-                cout << " Binay Search Tree Operations " << endl;
+                cout << " Binary Search Tree Operations " << endl;
                 cout << "-------------------------------" << endl;
-                cout << "1. Add elements to BST" << endl;
-                cout << "2. Draw BST" << endl;
-                cout << "3. Print BSTNode at a given level" << endl;
-                cout << "4. Print all leaf BSTNodes" << endl;
-                cout << "5. Print right view of BST" << endl;
-                cout << "6. Print left view of BST" << endl;
-                cout << "7. Find a key in BST" << endl;
-                cout << "8. Delete a BSTNode in BST" << endl;
-                cout << "9. Inorder traversal (LNR) using recursion" << endl;
-                cout << "10. Preorder traversal (NLR) using recursion" << endl;
-                cout << "11. Postorder traversal (LRN) using recursion" << endl;
-                cout << "12. Level order traversal using recursion" << endl;
-                cout << "13. Calculate height of BST" << endl;
-                cout << "14. Find smallest BSTNode in BST" << endl;
-                cout << "15. Check if BST is balanced" << endl;
-                cout << "16. Check if BST is a valid BST" << endl;
-                cout << "17. Convert BST to balanced BST" << endl;
-                cout << "18. Inoder Traversal using Stack" << endl;
-                cout << "19. Preoder Traversal using Stack" << endl;
-                cout << "20. Postoder Traversal using Stack" << endl;
-                cout << "21. Level oder Traversal using Stack" << endl;
+                cout << "1. Add elements manually to BST" << endl;
+                cout << "2. Add elements randomly to BST" << endl;
+                cout << "3. Draw BST" << endl;
+                cout << "4. Print BSTNode at a given level" << endl;
+                cout << "5. Print all leaf BSTNodes" << endl;
+                cout << "6. Print right view of BST" << endl;
+                cout << "7. Print left view of BST" << endl;
+                cout << "8. Find a key in BST" << endl;
+                cout << "9. Delete a BSTNode in BST" << endl;
+                cout << "10. Inorder traversal (LNR) using recursion" << endl;
+                cout << "11. Preorder traversal (NLR) using recursion" << endl;
+                cout << "12. Postorder traversal (LRN) using recursion" << endl;
+                cout << "13. Level order traversal using recursion" << endl;
+                cout << "14. Calculate height of BST" << endl;
+                cout << "15. Find smallest BSTNode in BST" << endl;
+                cout << "16. Check if BST is balanced" << endl;
+                cout << "17. Check if BST is a valid BST" << endl;
+                cout << "18. Convert BST to balanced BST" << endl;
+                cout << "19. Inorder Traversal using Stack" << endl;
+                cout << "20. Preorder Traversal using Stack" << endl;
+                cout << "21. Postorder Traversal using Stack" << endl;
+                cout << "22. Level order Traversal using Stack" << endl;
                 cout << "0. Exit" << endl;
                 cout << "-------------------------------" << endl;
                 cout << "Enter your choice: ";
@@ -2329,27 +2835,30 @@ int main() {
 
                 switch (choice) {
                 case 1:
-                    bst.addElements();
+                    bst.addElementsManually();
                     break;
                 case 2:
-                    bst.drawBST();
+                    bst.addElementsRandomly();
                     break;
                 case 3:
+                    bst.drawBST();
+                    break;
+                case 4:
                     int level;
                     cout << "Enter the level: ";
                     cin >> level;
                     bst.printBSTNodeAtLevel(level);
                     break;
-                case 4:
+                case 5:
                     bst.printLeafBSTNodes();
                     break;
-                case 5:
+                case 6:
                     bst.printRightView();
                     break;
-                case 6:
+                case 7:
                     bst.printLeftView();
                     break;
-                case 7:
+                case 8:
                     int key;
                     cout << "Enter the key to search: ";
                     cin >> key;
@@ -2360,31 +2869,31 @@ int main() {
                         cout << "Key not found in BST" << endl;
                     }
                     break;
-                case 8:
+                case 9:
                     int deleteKey;
                     cout << "Enter the key to delete: ";
                     cin >> deleteKey;
                     bst.deleteBSTNode(bst.getRoot(), deleteKey);
                     break;
-                case 9:
+                case 10:
                     bst.printInorderTraversal();
                     break;
-                case 10:
+                case 11:
                     bst.printPreorderTraversal();
                     break;
-                case 11:
+                case 12:
                     bst.printPostorderTraversal();
                     break;
-                case 12:
+                case 13:
                     bst.printLevelOrderTraversal();
                     break;
-                case 13:
+                case 14:
                     cout << "Height of the BST: " << bst.getHeight() << endl;
                     break;
-                case 14:
+                case 15:
                     cout << "Smallest BSTNode in the BST: " << bst.findSmallestBSTNode() << endl;
                     break;
-                case 15:
+                case 16:
                     if (bst.isBalanced()) {
                         cout << "The BST is balanced." << endl;
                     }
@@ -2392,7 +2901,7 @@ int main() {
                         cout << "The BST is not balanced." << endl;
                     }
                     break;
-                case 16:
+                case 17:
                     if (bst.isBST()) {
                         cout << "The BST is a valid BST." << endl;
                     }
@@ -2400,9 +2909,21 @@ int main() {
                         cout << "The BST is not a valid BST." << endl;
                     }
                     break;
-                case 17:
+                case 18:
                     bst.convertToBalancedBST();
                     cout << "BST converted to balanced BST." << endl;
+                    break;
+                case 19:
+                    bst.inorderTraversal(bst.getRoot());
+                    break;
+                case 20:
+                    bst.preorderTraversal(bst.getRoot());
+                    break;
+                case 21:
+                    bst.postorderTraversal(bst.getRoot());
+                    break;
+                case 22:
+                    bst.levelorderTraversal(bst.getRoot());
                     break;
                 case 0:
                     cout << "Exiting..." << endl;
@@ -2414,10 +2935,141 @@ int main() {
             } while (choice != 0);
             break;
         }
+        case 10: {
+
+            int size, M;
+            int isDC;
+            cout << "-----------------------" << endl;
+            cout << " Hash Table Operations " << endl;
+            cout << "-----------------------" << endl;
+            cout << "Enter the size of the hash table: ";
+            cin >> size;
+            cout << "Enter the value of M for hashing: ";
+            cin >> M;
+            cout << "---------------------------" << endl;
+            cout << "Separate Chaining Technique" << endl;
+            cout << "---------------------------" << endl;
+            cout << "0. Direct Chaining\n";
+            cout << "1. Coalesced Chaining\n";
+            cout << "---------------------------" << endl;
+            cout << " Open Addressing Technique (not done yet)" << endl;
+            cout << "---------------------------" << endl;
+            cout << "                            " << endl;
+            cout << "---------------------------" << endl;
+            cout << "Choose chaining method: ";
+            cin >> isDC;
+
+            HashTable hashTable(size, isDC == 0, M);
+
+            int choice, key;
+            bool running = true;
+
+            while (running) {
+                cout << "----------------------------";
+                cout << "\n1. Insert elements";
+                cout << "\n2. Remove an element";
+                cout << "\n3. Search for an element";
+                cout << "\n4. Display the hash table";
+                cout << "\n0. Exit\n";
+                cout << "----------------------------";
+                cout << "\nEnter your choice: ";
+                cin >> choice;
+
+                switch (choice) {
+                case 1: {
+                    int insertChoice;
+                    cout << "Choose the method to insert elements:" << endl;
+                    cout << "1. Manually enter keys" << endl;
+                    cout << "2. Generate random keys" << endl;
+                    cout << "Enter your choice: ";
+                    cin >> insertChoice;
+
+                    if (insertChoice == 1) {
+                        cout << "Enter the elements to insert (enter -1 to end): ";
+                        while (cin >> key && key != -1) {
+                            if (isDC == 0) {
+                                hashTable.insertDC(key);
+                            }
+                            else {
+                                hashTable.insertCC(key);
+                            }
+                        }
+                    }
+                    else if (insertChoice == 2) {
+                        int numKeys;
+                        int minRange, maxRange;
+                        cout << "Enter the number of random keys to generate: ";
+                        cin >> numKeys;
+                        cout << "Enter the minimum range for random keys: ";
+                        cin >> minRange;
+                        cout << "Enter the maximum range for random keys: ";
+                        cin >> maxRange;
+
+                        mt19937_64 rng(time(0)); 
+                        uniform_int_distribution<int> dist(minRange, maxRange);
+
+                        for (int i = 0; i < numKeys; i++) {
+                            key = dist(rng); 
+                            if (isDC == 0) {
+                                hashTable.insertDC(key);
+                            }
+                            else {
+                                hashTable.insertCC(key);
+                            }
+                        }
+                    }
+                    else {
+                        cout << "Invalid choice!" << endl;
+                    }
+                    break;
+                }
+
+                case 2: {
+                    cout << "Enter the key to remove: ";
+                    cin >> key;
+                    if (isDC == 0) {
+                        hashTable.removeDC(key);
+                    }
+                    else {
+                        hashTable.removeCC(key);
+                    }
+                    break;
+                }
+                case 3: {
+                    cout << "Enter the key to search: ";
+                    cin >> key;
+                    if (isDC == 0) {
+                        hashTable.searchDC(key);
+                    }
+                    else {
+                        hashTable.searchCC(key);
+                    }
+                    break;
+                }
+                case 4: {
+                    if (isDC == 0) {
+                        hashTable.displayDC();
+                    }
+                    else {
+                        hashTable.displayCC();
+                    }
+                    break;
+                }
+                case 0:
+                    running = false;
+                    break;
+                default:
+                    cout << "Invalid choice!" << endl;
+                    break;
+                }
+            }
+        }
         
         }
         
     } while (choice != 0);
 
+    delete[] data;
+    system("pause");
         return 0;
 }

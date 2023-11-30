@@ -39,6 +39,9 @@
     <ClCompile Include="test 7.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test 8 for DSA111 test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Array.h">

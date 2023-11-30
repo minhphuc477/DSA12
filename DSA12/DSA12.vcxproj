@@ -132,6 +132,7 @@
     <ClCompile Include="test 4.cpp" />
     <ClCompile Include="test 5.cpp" />
     <ClCompile Include="test 7.cpp" />
+    <ClCompile Include="test 8 for DSA111 test.cpp" />
     <ClCompile Include="test1.cpp" />
     <ClCompile Include="test2forheader.cpp" />
     <ClCompile Include="test6.cpp" />
